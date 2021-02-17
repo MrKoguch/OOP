@@ -1,23 +1,13 @@
 from random import gauss
 
 
-class RandomFloat:
-    def __init__(self, mu: float, /, *, sigma: float = 1.):
-        if not isinstance(mu, float) or not isinstance(sigma, float):
-            raise TypeError
-        self.mu = mu
-        self.sigma = sigma
-        self.old = 0
-
+class CustomFloat:
     def is_numeric(self, other):
-        if isinstance(other, RandomFloat):
+        if isinstance(other, CustomFloat):
             other = float(other)
         elif not isinstance(other, (float, int)):
             raise TypeError
         return other
-
-    def __float__(self):
-        return gauss(self.mu, self.sigma)
 
     def __int__(self):
         return int(float(self))
@@ -28,14 +18,6 @@ class RandomFloat:
 
     def __radd__(self, other):
         return self + other
-
-    # def __iadd__(self, other):
-    #     if self.old == 0:
-    #         self.old = self + other
-    #         return self + other
-    #     else:
-    #         self.old += other
-    #         return self.old
 
     def __mul__(self, other):
         other = self.is_numeric(other)
@@ -110,14 +92,6 @@ class RandomFloat:
     def __rmod__(self, other):
         return other % float(self)
 
-    def __imod__(self, other):
-        if self.old == 0:
-            self.old = self % other
-            return self % other
-        else:
-            self.old %= other
-            return self.old
-
     def __pow__(self, power, modulo=None):
         self.is_numeric(power)
         return float(self) ** power
@@ -126,14 +100,6 @@ class RandomFloat:
         other = self.is_numeric(other)
         return other ** float(self)
 
-    def __ipow__(self, other):
-        if self.old == 0:
-            self.old = self ** other
-            return self ** other
-        else:
-            self.old **= other
-            return self.old
-
     def __iadd__(self, other):
         if isinstance(other, RandomFloat):
             return RandomFloat(self.mu + other)
@@ -141,6 +107,30 @@ class RandomFloat:
             raise TypeError
         return RandomFloat(self.mu + other)
 
+
+class RandomFloat(CustomFloat):
+    def __init__(self, mu: float, /, *, sigma: float = 1.):
+        if not isinstance(mu, float) or not isinstance(sigma, float):
+            raise TypeError
+        self.mu = mu
+        self.sigma = sigma
+        self.old = 0
+
+    def __float__(self):
+        return gauss(self.mu, self.sigma)
+
+
+class EpsilonFloat(CustomFloat):
+    def __init__(self, /, data, *, epsilon=1e-5):
+
+        self.data = data
+        self.epsilon = epsilon
+
+    def __float__(self):
+        return self.data
+
+    def __eq__(self, other):
+        ...
 
 # <, >, =<, =>, через float
 # == RandomFloat(10.0) и RandomFloat(10.0) скастовать в float и сравнивать как число и RF, RandomFloat(10.0) и
