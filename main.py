@@ -26,28 +26,12 @@ class CustomFloat:
     def __rmul__(self, other):
         return self * other
 
-    def __imul__(self, other):
-        if self.old == 0:
-            self.old = self * other
-            return self * other
-        else:
-            self.old *= other
-            return self.old
-
     def __sub__(self, other):
         other = self.is_numeric(other)
         return float(self) - other
 
     def __rsub__(self, other):
         return -(self - other)
-
-    def __isub__(self, other):
-        if self.old == 0:
-            self.old = self - other
-            return self - other
-        else:
-            self.old -= other
-            return self.old
 
     def __abs__(self):
         return abs(float(self))
@@ -60,14 +44,6 @@ class CustomFloat:
         other = self.is_numeric(other)
         return other / float(self)
 
-    def __itruediv__(self, other):
-        if self.old == 0:
-            self.old = self / other
-            return self / other
-        else:
-            self.old /= other
-            return self.old
-
     def __floordiv__(self, other):
         other = self.is_numeric(other)
         return int(float(self) / other)
@@ -75,15 +51,6 @@ class CustomFloat:
     def __rfloordiv__(self, other):
         other = self.is_numeric(other)
         return int(other / float(self))
-
-    def __ifloordiv__(self, other):
-        self.is_numeric(other)
-        if self.old == 0:
-            self.old = self // other
-            return self // other
-        else:
-            self.old //= other
-            return self.old
 
     def __mod__(self, other):
         other = self.is_numeric(other)
@@ -107,6 +74,22 @@ class CustomFloat:
             raise TypeError
         return RandomFloat(self.mu + other)
 
+    def __lt__(self, other):
+        other = self.is_numeric(other)
+        return float(self) < other
+
+    def __le__(self, other):
+        other = self.is_numeric(other)
+        return float(self) <= other
+
+    def __gt__(self, other):
+        other = self.is_numeric(other)
+        return float(self) > other
+
+    def __ge__(self, other):
+        other = self.is_numeric(other)
+        return float(self) >= other
+
 
 class RandomFloat(CustomFloat):
     def __init__(self, mu: float, /, *, sigma: float = 1.):
@@ -114,15 +97,24 @@ class RandomFloat(CustomFloat):
             raise TypeError
         self.mu = mu
         self.sigma = sigma
-        self.old = 0
 
     def __float__(self):
         return gauss(self.mu, self.sigma)
 
+    def __eq__(self, other):
+        if not isinstance(other, RandomFloat):
+            raise TypeError
+        if other.mu == self.mu and other.sigma == self.sigma:
+            return True
+        return False
+
+
+
 
 class EpsilonFloat(CustomFloat):
-    def __init__(self, /, data, *, epsilon=1e-5):
-
+    def __init__(self, /, data: float, *, epsilon: float = 1e-5):
+        if not isinstance(data, float) or not isinstance(epsilon, float):
+            raise TypeError
         self.data = data
         self.epsilon = epsilon
 
@@ -130,12 +122,16 @@ class EpsilonFloat(CustomFloat):
         return self.data
 
     def __eq__(self, other):
-        ...
+        other = self.is_numeric(other)
+        return -self.epsilon < (self - other) < self.epsilon
+
 
 # <, >, =<, =>, через float
 # == RandomFloat(10.0) и RandomFloat(10.0) скастовать в float и сравнивать как число и RF, RandomFloat(10.0) и
 # число: float(RandomFloat(10.0)) - число = +_ 0.001 (погрешность). Добавить настройку погрешности для класса.
-c = RandomFloat(10.0)
-print(c)
-c += 1.
-print(c)
+a = RandomFloat(11.)
+b = RandomFloat(11.)
+f = RandomFloat(12.)
+c = EpsilonFloat(10.0)
+g = 10.
+print(a == f)
