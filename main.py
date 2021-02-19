@@ -103,10 +103,8 @@ class RandomFloat(CustomFloat):
 
     def __eq__(self, other):
         if not isinstance(other, RandomFloat):
-            raise TypeError
-        if other.mu == self.mu and other.sigma == self.sigma:
-            return True
-        return False
+            return False
+        return other.mu == self.mu and other.sigma == self.sigma
 
 
 
@@ -122,8 +120,11 @@ class EpsilonFloat(CustomFloat):
         return self.data
 
     def __eq__(self, other):
-        other = self.is_numeric(other)
-        return -self.epsilon < (self - other) < self.epsilon
+        if isinstance(other, EpsilonFloat):
+            other = float(other)
+        elif not isinstance(other, (float, int)):
+            return False
+        return abs(self - other) <= self.epsilon
 
 
 # <, >, =<, =>, через float
@@ -134,4 +135,4 @@ b = RandomFloat(11.)
 f = RandomFloat(12.)
 c = EpsilonFloat(10.0)
 g = 10.
-print(a == f)
+print(c == 10)
