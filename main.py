@@ -107,8 +107,6 @@ class RandomFloat(CustomFloat):
         return other.mu == self.mu and other.sigma == self.sigma
 
 
-
-
 class EpsilonFloat(CustomFloat):
     def __init__(self, /, data: float, *, epsilon: float = 1e-5):
         if not isinstance(data, float) or not isinstance(epsilon, float):
@@ -127,12 +125,28 @@ class EpsilonFloat(CustomFloat):
         return abs(self - other) <= self.epsilon
 
 
-# <, >, =<, =>, через float
-# == RandomFloat(10.0) и RandomFloat(10.0) скастовать в float и сравнивать как число и RF, RandomFloat(10.0) и
-# число: float(RandomFloat(10.0)) - число = +_ 0.001 (погрешность). Добавить настройку погрешности для класса.
-a = RandomFloat(11.)
-b = RandomFloat(11.)
-f = RandomFloat(12.)
-c = EpsilonFloat(10.0)
-g = 10.
-print(c == 10)
+class W:
+    def x(self):
+        print("W")
+
+
+class A(W):
+    def x(self):
+        print("A")
+        super().x()
+
+
+class B(W):
+    def x(self):
+        print("B")
+        super().x()
+
+
+class C(A, B):
+    def x(self):
+        print("C")
+        super().x()
+
+
+c = C()
+print(c.x())
