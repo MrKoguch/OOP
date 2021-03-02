@@ -36,45 +36,56 @@ class Molecule:
             raise KeyError
         elif map1 in neigh2:  # что уже есть связь м\у этими атомами
             raise KeyError
-
         neigh1[map2] = bond
         neigh2[map1] = bond
 
-    def show_bonds(self):
+    def get_atom(self, map_):
+        return self._atoms[map_]
+
+    def get_bond(self):
+        ...
+
+    def get_bonds(self):
         return self._bonds
 
-    def show_atoms(self):
+    def get_atoms(self):
         return self._atoms
 
-    # def _check_list(self, start):  # Проверка графа на связность.
-    #     ...
-
     def del_bond(self, map1, map2):
-        if map2 not in self._bonds[map1]:
-            raise KeyError
-        self._bonds[map1].pop(map2)
-        self._bonds[map2].pop(map1)
-        if not self._bonds[map1]:  # удаляет атом если у него больше нет пар
-            self._bonds.pop(map1)
-            self._atoms.pop(map1, None)
-        if not self._bonds[map2]:
-            self._bonds.pop(map2)
-            self._atoms.pop(map2, None)
+        del self._bonds[map1][map2]
+        del self._bonds[map2][map1]
 
     def del_atom(self, map_):
         self._atoms.pop(map_)
-        n = self._bonds.pop(map_)
-        for i in n.keys():
+        nab = self._bonds.pop(map_)
+        for i in nab.keys():
             self._bonds[i].pop(map_)
-            if not self._bonds[i]:  # удаляет атом если у него больше нет пар
-                self._bonds.pop(i)
-                self._atoms.pop(i)
-        if not self._bonds:
-            raise RuntimeError
 
+    def __iter__(self):
+        # возвращает генератор
+        return iter(self._atoms)
 
-# дописать проверки для atom - 15 строка
-# добавить метод : del_atom(map_), del_bond(map1, map2)
+    def iter_bonds(self):
+        temp = list()
+        # должен быть генератором возвращающим пару (1,2) (2,1) цикл в цикле
+        for i in self._bonds:
+            for a in self._bonds[i]:
+                if not (a, i) in temp:
+                    temp.append((i, a))
+                    yield i, a
+
+    def iterr_bonds(self):
+        # Значения выглядят как матрица смежности и бежим по элементам главной диагонали и над ней. Работает только
+        # если атомы попорядку
+        bonds_size = len(self._bonds)
+        for i in range(bonds_size):
+            for j in range(bonds_size - i):
+                j += i
+                try:
+                    _ = self._bonds[i + 1][j + 1]
+                    yield i + 1, j + 1
+                except KeyError:
+                    continue
 
 
 ol = Molecule()
@@ -83,18 +94,24 @@ ol.add_atom("c")
 ol.add_atom("N")
 ol.add_atom("n")
 ol.add_atom("O")
-ol.add_atom("o")
-print(ol.show_atoms())
+ol.add_atom("O")
+ol.add_atom("o", map_=8)
+print(ol.get_atoms())
 ol.add_bond(1, 2, 1)
 ol.add_bond(2, 3, 1)
 ol.add_bond(3, 4, 1)
 ol.add_bond(3, 5, 2)
 ol.add_bond(6, 4, 1)
 ol.add_bond(6, 5, 2)
-print(ol.show_bonds())
-ol.del_bond(1, 2)
-print(ol.show_bonds())
-print(ol.show_atoms())
-ol.del_atom(2)
-print(ol.show_bonds())
-print(ol.show_atoms())
+print(ol.get_bonds())
+
+# for i in ol.iter_bonds():
+#     print(i)
+x = ol.iter_bonds()
+while True:
+    try:
+        n = next(x)
+    except StopIteration:
+        break
+    else:
+        print(n)
