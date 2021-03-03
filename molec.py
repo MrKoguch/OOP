@@ -66,26 +66,57 @@ class Molecule:
         return iter(self._atoms)
 
     def iter_bonds(self):
-        temp = list()
-        # должен быть генератором возвращающим пару (1,2) (2,1) цикл в цикле
-        for i in self._bonds:
-            for a in self._bonds[i]:
-                if not (a, i) in temp:
-                    temp.append((i, a))
-                    yield i, a
+        return IterBonds(self._bonds)
 
-    def iterr_bonds(self):
-        # Значения выглядят как матрица смежности и бежим по элементам главной диагонали и над ней. Работает только
-        # если атомы попорядку
-        bonds_size = len(self._bonds)
-        for i in range(bonds_size):
-            for j in range(bonds_size - i):
-                j += i
-                try:
-                    _ = self._bonds[i + 1][j + 1]
-                    yield i + 1, j + 1
-                except KeyError:
+    def __contains__(self, item):
+        if isinstance(item, int):
+            return item in self._atoms
+        elif isinstance(item, str):
+            return item in self._atoms.values()
+
+
+class Atom:
+    def __init__(self, isotope: int = None):
+    # isotope >= 1
+        self._isotope = isotope
+
+    def __eq__(self, other):
+        return isinstance(self, type(other)) and self._isotope == other._isotope
+
+
+class C(Atom):
+    ...
+
+
+class O(Atom):
+    ...
+
+
+class N(Atom):
+    ...
+
+
+class Bond:
+    # порядок связи в инит
+    ...
+
+
+class IterBonds:
+    def __init__(self, adj):
+        self._bonds = adj
+
+    def __iter__(self):
+        seen = set()
+        for map1, nb in self._bonds.items():
+            for map2 in nb:
+                if map2 in seen:
                     continue
+                yield map1, map2
+            seen.add(map1)
+
+
+
+# Д/З класс IterAtoms который возвращает пару (номер атома, имя атома)
 
 
 ol = Molecule()
@@ -101,17 +132,13 @@ ol.add_bond(1, 2, 1)
 ol.add_bond(2, 3, 1)
 ol.add_bond(3, 4, 1)
 ol.add_bond(3, 5, 2)
-ol.add_bond(6, 4, 1)
+ol.add_bond(8, 4, 1)
 ol.add_bond(6, 5, 2)
 print(ol.get_bonds())
 
 # for i in ol.iter_bonds():
 #     print(i)
 x = ol.iter_bonds()
-while True:
-    try:
-        n = next(x)
-    except StopIteration:
-        break
-    else:
-        print(n)
+print(x)
+for i in x:
+    print(i)
