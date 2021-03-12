@@ -3,8 +3,8 @@ class SparseList:
         self._data = {}
         self._len = 0
 
-    def __repr__(self):
-        temp = []
+    def __repr__(self):  # переписать: вписать из словаря значения по ключу for k, v in s._d.it(): temp[k] = v
+        temp = [0.] * self._len
         for i in range(len(self)):
             if i in self._data.keys():
                 temp.append(self._data[i])
@@ -15,7 +15,7 @@ class SparseList:
     def __len__(self):
         return self._len
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value):  # переписать отриц индескы в нормальные
         # d[] = v +
         if not isinstance(key, int) and not isinstance(value, (float, int)):
             raise TypeError
@@ -37,7 +37,7 @@ class SparseList:
             else:
                 self._data[key] = value
 
-    def __getitem__(self, item):
+    def __getitem__(self, item):  # переписать
         # v = d[] +
         if isinstance(item, int):
             if item >= self._len or -self._len > item:
@@ -46,7 +46,7 @@ class SparseList:
                 try:
                     return self._data[item]
                 except KeyError:
-                    return 0
+                    return 0.
             elif isinstance(item, int) and item >= -self._len:
                 try:
                     return self._data[len(self) + item]
@@ -64,7 +64,7 @@ class SparseList:
         else:
             raise TypeError
 
-    def __delitem__(self, key):
+    def __delitem__(self, key):  # переписать срез и преобразовать отрицательные индескы
         # del o[]
         if not isinstance(key, (int, slice)):
             raise TypeError
@@ -74,7 +74,8 @@ class SparseList:
                 raise IndexError("list index out of range")
             if key >= self._len:  # or key < -self._len
                 raise IndexError("list index out of range")
-            if 0 <= key < len(self):
+
+            if 0 <= key:
                 try:
                     del self._data[key]
                 except KeyError:
@@ -106,7 +107,7 @@ class SparseList:
                     del self._data[i]
                 except KeyError:
                     pass
-            inter = key.stop - key.start
+            inter = (key.stop - key.start) // key.step
             for i in range(len(self)):
                 if i < key.start:
                     new_obj._data[i] = self._data[i]
@@ -126,7 +127,7 @@ class SparseList:
             self._data[self._len] = item
             self._len += 1
 
-    def pop(self, index=None):
+    def pop(self, index=None):  # переписать
         if isinstance(index, type(None)):
             try:
                 value = self[self._len - 1]
@@ -148,7 +149,7 @@ class SparseList:
 
     def count(self, item):
         if not isinstance(item, (int, float)):
-            raise ValueError
+            raise TypeError
         elif item == 0:
             return len(self) - len(self._data)
         else:
@@ -156,7 +157,7 @@ class SparseList:
             for i in self._data.values():
                 if item == i:
                     temp += 1
-            return temp
+            return sum(v == item for v in self._data.values())
 
     def clear(self):
         self._data = {}
@@ -166,29 +167,36 @@ class SparseList:
         for i in item:
             self.append(i)
 
-    def index(self, item):
+    def index(self, item):  # дописать старт, стоп
         if not isinstance(item, (int, float)):
             raise TypeError
         elif item == 0:
             if len(self) == len(self._data):
                 raise ValueError
             else:
-                return "Ноль где-то есть"
+                for i in range(len(self)):
+                    try:
+                        self._data[i]
+                    except KeyError:
+                        return i
         for key, val in self._data.items():
             if val == item:
                 return key
+            raise ValueError
 
-    def remove(self, item):
+    def remove(self, item):  # переписать понять чем это функция отличается
         del self[item]
 
     def reverse(self):
         new_list = {}
+        ln = self._len - 1
         for key, vals in self._data.items():
-            new_list[len(self) - 1 - key] = vals
+            new_list[ln - key] = vals
         self._data = new_list
 
 
 test = SparseList()
+test.pop()
 test.append(2)
 test.append(1)
 test.append(0)
