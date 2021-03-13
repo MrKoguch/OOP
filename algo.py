@@ -32,6 +32,7 @@ print(binary_search(test_list, d))
 finish_time = time.perf_counter()
 print(finish_time - start_time)
 
+
 def b_s(a, value):
     mid = len(a) // 2
     low = 0
