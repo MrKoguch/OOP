@@ -40,22 +40,17 @@ class SparseList:
             return self._data.get(item, 0.)
         elif isinstance(item, slice):
             out_dict = SparseList()
-            list_item = []
-            count = 0
             for i in range(*item.indices(len(self))):
-                list_item.append(i)
-            for i in list_item:
                 try:
-                    out_dict._data[count] = self._data[i]
-                    count += 1
+                    out_dict._data[out_dict._len] = self._data[i]
+                    out_dict._len += 1
                 except KeyError:
-                    count += 1
-            out_dict._len = len(list_item)
+                    out_dict._len += 1
             return out_dict
         else:
             raise TypeError
 
-    def __delitem__(self, key):  # переписать срез и преобразовать отрицательные индескы
+    def __delitem__(self, key):
         # del o[]
         if not isinstance(key, (int, slice)):
             raise TypeError
@@ -69,7 +64,7 @@ class SparseList:
                 del self._data[key]
             except KeyError:
                 ...
-            for i in range(len(self)):
+            for i in range(self._len):
                 if i in self._data.keys():
                     if key > i:
                         new_obj._data[i] = self._data[i]
@@ -136,7 +131,7 @@ class SparseList:
         for i in item:
             self.append(i)
 
-    def index(self, item, start=0, stop=2147483647):  # дописать старт, стоп
+    def index(self, item, start=0, stop=2147483647):
         if not isinstance(item, (int, float)):
             raise TypeError
         elif start >= self._len:
