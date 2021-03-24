@@ -15,7 +15,7 @@ class Molecule:
 
         if not isinstance(atom, Atom):
             raise TypeError
-        self._atoms[map_] = atom.get_symbol()
+        self._atoms[map_] = atom
         self._bonds[map_] = {}
         return map_  # чтобы значть что это был за атом, чтобы понять, какой это был атом, т.к. мы могли и не знать мап
         # данного атома
@@ -69,6 +69,22 @@ class Molecule:
         elif isinstance(item, Atom):
             return item.get_symbol() in self._atoms.values()
 
+    def d_c(self):
+        num_atoms = []
+        for i in self._atoms:
+            val = self._atoms[i]
+            if isinstance(val, C):
+                b = self._bonds[i]
+                if len(b) == 1:
+                    continue
+                count = 0
+                for c_bond in b.values():
+                    if c_bond == 2:
+                        count += 1
+                if count == 2:
+                    num_atoms.append(i)
+        return num_atoms
+
 
 class Atom:
     def __init__(self, isotope: int = None):
@@ -90,25 +106,33 @@ class Atom:
 class C(Atom):
     def __init__(self, isotope: int = None):
         super().__init__(isotope)
-        self._symbol = "C"
+
+    def __repr__(self):
+        return "C"
 
 
 class O(Atom):
     def __init__(self, isotope: int = None):
         super().__init__(isotope)
-        self._symbol = "O"
+
+    def __repr__(self):
+        return "O"
 
 
 class N(Atom):
     def __init__(self, isotope: int = None):
         super().__init__(isotope)
-        self._symbol = "N"
+
+    def __repr__(self):
+        return "N"
 
 
 class Cl(Atom):
     def __init__(self, isotope: int = None):
         super().__init__(isotope)
-        self._symbol = "Cl"
+
+    def __repr__(self):
+        return "Cl"
 
 
 class Bond:
@@ -157,31 +181,36 @@ ol.add_atom(O())
 ol.add_atom(O())
 ol.add_atom(O(), map_=8)
 print(ol.get_atoms())
-ol.add_bond(1, 2, Bond(1))
-ol.add_bond(2, 3, Bond(1))
-ol.add_bond(3, 4, Bond(1))
+ol.add_bond(1, 2, Bond(2))
+ol.add_bond(2, 3, Bond(2))
+ol.add_bond(3, 4, Bond(2))
 ol.add_bond(3, 5, Bond(2))
 ol.add_bond(6, 4, Bond(1))
 ol.add_bond(6, 5, Bond(2))
 print(ol.get_bonds())
 
-carbon = C(13)
-holy_carbon = C()
-holy_carbon2 = C()
-oxygen = O()
-print(f"carbon == holy_carbon:", carbon == holy_carbon)
-print(f'holy_carbon2 == holy_carbon:', holy_carbon2 == holy_carbon)
-print(f"oxygen == holy_carbon2: ", oxygen == holy_carbon2)
-print(f"C() in ol:", C() in ol)
-print(f"Cl() in ol:", Cl() in ol)
-print(f"1 in ol:", 1 in ol)
-print(f"10 in ol", 10 in ol)
+# carbon = C(13)
+# holy_carbon = C()
+# holy_carbon2 = C()
+# oxygen = O()
+# print(f"carbon == holy_carbon:", carbon == holy_carbon)
+# print(f'holy_carbon2 == holy_carbon:', holy_carbon2 == holy_carbon)
+# print(f"oxygen == holy_carbon2: ", oxygen == holy_carbon2)
+# print(f"C() in ol:", C() in ol)
+# print(f"Cl() in ol:", Cl() in ol)
+# print(f"1 in ol:", 1 in ol)
+# print(f"10 in ol", 10 in ol)
 
-for i in ol.iter_bonds():
-    print(i)
+# for i in ol.iter_bonds():
+#     print(i)
+#
+# for i in ol.iter_atoms():
+#     print(i)
+#
+# for i in ol:
+#     print(i)
 
-for i in ol.iter_atoms():
-    print(i)
 
-for i in ol:
-    print(i)
+
+print(ol.d_c())
+
